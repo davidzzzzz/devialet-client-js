@@ -1,54 +1,86 @@
-import { DevialetConfig } from "../config/devialet_config";
 import axios, { AxiosInstance } from "axios";
-import { Mutations } from "./endpoints";
-import { defaultResolver, DevialetGroup } from "./resolver";
-// import { Sources as Source } from "./constants";
+import { Mutations, Queries } from "./endpoints";
+import { GroupState, Source } from "../models/source";
+import { DevialetDevice } from "../models/device_information";
 
-export interface DevialetClient {
-    // getVolume(): Promise<number>;
-    // volume(volume: number): Promise<void>;
-    // getNightMode(): Promise<boolean>;
-    // nightMode(enabled: boolean): Promise<void>;
-    // getCurrentSource(): Promise<Source>;
-    // getAllSources(): Promise<Source[]>;
-    // getCurrentPosition(): Promise<number>;
-    // volumeUp(): Promise<void>;
-    // volumeDown(): Promise<void>;
-    // mute(): Promise<void>;
-    play(): Promise<void>;
-    pause(): Promise<void>;
-    // previous(): Promise<void>;
-    // next(): Promise<void>;
-    // unmute(): Promise<void>;
-    // setSource(source: Source): Promise<void>;
+type Volume = {
+    volume: number;
 }
 
-class HttpDevialetClient implements DevialetClient {
+type NightMode = {
+    nightMode: "on" | "off"
+}
+
+export class Devialet {
     private httpClient: AxiosInstance;
 
-    constructor(baseURL: string) {
-        this.httpClient = axios.create({ baseURL });
+    constructor(leader: string | DevialetDevice) {
+        const address = () => {
+            if (typeof leader === "string") {
+                return leader;
+            } else {
+               return leader.address;
+            }
+        };
+        this.httpClient = axios.create({ baseURL: `http://${address()}` });
     }
 
-    async play(): Promise<void> {
-        await this.httpClient.post(Mutations.PLAY);
+    nightMode(enabled: boolean): Promise<void> {
+        return this.httpClient.post(Mutations.VOLUME_UP, {
+            "nightMode": enabled ? "on" : "off"
+        });
     }
-
-    async pause(): Promise<void> {
-        await this.httpClient.post(Mutations.PAUSE);
+    async isNightModeEnabled(): Promise<boolean> {
+        const m = await this.httpClient.get<NightMode>(Queries.NIGHT_MODE);
+        return m.data.nightMode === "on";
     }
-}
-
-export async function createHttpDevialetClient(config: DevialetConfig): Promise<DevialetClient> {
-    if (config.mode === "ip") {
-        if (!config.ipAddress) {
-            throw new Error("Invalid configuration for HTTP Devialet client");
+    source(source: Source): Promise<void> {
+        return this.httpClient.post(Mutations.SELECT_SOURCE(source));
+    }
+    async getVolume(): Promise<number> {
+        const v = await this.httpClient.get<Volume>(Queries.VOLUME);
+        return v.data.volume;
+    }
+    volume(volume: number): Promise<void> {
+        if (volume < 0 || volume > 100) {
+            return Promise.reject("Volume must be between 0-100");
         }
-        return Promise.resolve(new HttpDevialetClient(config.ipAddress));
+        return this.httpClient.post(Mutations.VOLUME_UP, {
+            "volume": volume
+        });
+    }
+    volumeUp(): Promise<void> {
+        return this.httpClient.post(Mutations.VOLUME_UP);
+    }
+    volumeDown(): Promise<void> {
+        return this.httpClient.post(Mutations.VOLUME_DOWN);
+    }
+    async getAllSources(): Promise<Source[]> {
+        const d = await this.httpClient.get<Source[]>(Queries.SOURCES);
+        return d.data;
+    }
+    async getCurrentState(): Promise<GroupState> {
+        const d = await this.httpClient.get<GroupState>(Queries.CURRENT_SOURCE);
+        return d.data;
+    }
+    previous(): Promise<void> {
+        return this.httpClient.post(Mutations.PREVIOUS_TRACK);
+    }
+    next(): Promise<void> {
+        return this.httpClient.post(Mutations.NEXT_TRACK);
+    }
+    mute(): Promise<void> {
+        return this.httpClient.post(Mutations.MUTE);
+    }
+    unmute(): Promise<void> {
+        return this.httpClient.post(Mutations.UNMUTE);
     }
 
-    const resolver = config.mDNSResolver ?? defaultResolver();
-    const groups = await resolver.groups();
-    const first = groups.next()?.value as DevialetGroup;
-    return Promise.resolve(new HttpDevialetClient(`http://${first.address}`));
+    play(): Promise<void> {
+        return this.httpClient.post(Mutations.PLAY);
+    }
+
+    pause(): Promise<void> {
+        return this.httpClient.post(Mutations.PAUSE);
+    }
 }

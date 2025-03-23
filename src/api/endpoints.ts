@@ -1,4 +1,4 @@
-import { Sources } from "./constants";
+import { Source } from "../models/source";
 
 const API_PREFIX = "/ipcontrol/v1";
 const DEVICES_PREFIX = `${API_PREFIX}/devices`;
@@ -11,7 +11,7 @@ export const Mutations = {
     VOLUME_DOWN: `${SYSTEM_PREFIX}/sources/current/soundControl/volumeDown`,
     VOLUME: `${SYSTEM_PREFIX}/sources/current/soundControl/volume`,
     NIGHT_MODE: `${SYSTEM_PREFIX}/settings/audio/nightMode`,
-    MUTE: `${SYSTEM_PREFIX}/sources/current/soundControl/mute`,
+    MUTE: `${GROUPS_PREFIX}/sources/current/playback/mute`,
     SEEK: `${GROUPS_PREFIX}/sources/current/playback/position`,
     PLAY: `${GROUPS_PREFIX}/sources/current/playback/play`,
     PAUSE: `${GROUPS_PREFIX}/sources/current/playback/pause`,
@@ -19,14 +19,13 @@ export const Mutations = {
     PREVIOUS_TRACK: `${GROUPS_PREFIX}/sources/current/playback/previous`,
     NEXT_TRACK: `${GROUPS_PREFIX}/sources/current/playback/next`,
     UNMUTE: `${GROUPS_PREFIX}/sources/current/playback/unmute`,
-    SELECT_SOURCE: (source: Sources) => `${GROUPS_PREFIX}/sources/${source}/playback/play`,
+    SELECT_SOURCE: (source: Source) => `${GROUPS_PREFIX}/sources/${source.sourceId}/playback/play`,
 };
 export const Queries = {
     GENERAL_INFO: `${DEVICES_PREFIX}/current`,
     VOLUME: `${SYSTEM_PREFIX}/sources/current/soundControl/volume`,
     NIGHT_MODE: `${SYSTEM_PREFIX}/settings/audio/nightMode`,
     EQUALIZER: `${SYSTEM_PREFIX}/settings/audio/equalizer`,
-    SOURCE: `${SYSTEM_PREFIX}/sources/current`,
     POWER: `${SYSTEM_PREFIX}/power`,
     INPUTS: `${SYSTEM_PREFIX}/sources`,
     SOUND_MODE: `${SYSTEM_PREFIX}/settings/audio/soundMode`,

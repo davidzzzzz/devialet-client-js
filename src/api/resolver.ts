@@ -1,88 +1,73 @@
 import { Bonjour, Service } from 'bonjour-service'
-import { Observable, Subject } from 'rxjs';
-import { defaultDeviceClient, DevialetDeviceClient } from './devialet_device_client';
 import pRetry from 'p-retry';
+import { DevialetGroup, DeviceInformation } from '../models/device_information';
+import axios from 'axios';
+import { Queries } from './endpoints';
+import debounce from 'debounce';
+import { DevialetDeviceRegistry } from './registry';
 
-export type DevialetGroup = {
-    readonly hostname: string;
-    readonly address: string;
-    readonly port: number;
-}
+const devialetDevices: string[] = ['Phantom', 'Arch', 'Dialog'];
 
-export interface DevialetGroupResolver {
-    watch(): Observable<DevialetGroup>;
-    groups(): Promise<Iterator<DevialetGroup>>;
-}
-
-export function defaultResolver(bonjour?: Bonjour | null, deviceClient?: DevialetDeviceClient | null): DevialetGroupResolver {
-    return new BonjourResolver(bonjour, deviceClient);
-}
-
-class BonjourResolver implements DevialetGroupResolver {
+export class DevialetmDNSResolver {
     private bonjour: Bonjour;
-    private client: DevialetDeviceClient;
-    private watcher: Subject<DevialetGroup>;
-    //host to group
-    private groupMap: Map<string, DevialetGroup>;
+    private ready: boolean = false;
+    private registry: DevialetDeviceRegistry;
 
-    constructor(bonjour?: Bonjour | null, deviceClient?: DevialetDeviceClient | null) {
+    constructor(bonjour?: Bonjour | null) {
         this.bonjour = bonjour != null ? bonjour : new Bonjour();
-        this.client = deviceClient != null ? deviceClient : defaultDeviceClient();
-        this.groupMap = new Map();
-        this.watcher = new Subject();
-        const browser = this.bonjour.find(
-            {
-                type: 'http',
-            }
-        );
+        this.registry = new DevialetDeviceRegistry();
+        const browser = this.bonjour.find({ type: 'http' });
+        const scanCompleteGuard = debounce(() => this.ready = true, 500);
         browser.on('up', async (service: Service) => {
-            if (service.port != 80) {
-                return;
-            }
-
-            // txt records aren't property parsed for reasons?
-            const isDevialetDevice = service.host.startsWith('Phantom') || service.host.startsWith('Arch') || service.host.startsWith('Dialog');
-            if (!isDevialetDevice) {
-                return;
-            }
-            if (this.groupMap.has(service.host)) {
-                return;
-            }
-            try {
-                const deviceInfo = await this.client.deviceInfo(`${service.host}:80`);
-                if (deviceInfo.isSystemLeader) {
-                    console.log(service);
-                    const group: DevialetGroup = {
-                        hostname: service.name,
-                        address: service.host,
-                        port: service.port,
-                    };
-                    this.groupMap.set(service.host, group);
-                    this.watcher.next(group);
-                }
-            } catch (t) {
-                this.watcher.error(t);
-            }
+            scanCompleteGuard();
+            this.handleService(service);
         });
+        browser.on('txt-update', async (service: Service) => this.handleService(service));
+        browser.on('down', service =>  this.registry.unregisterDevice(f => f.hostname === service.name));
         browser.start();
     }
 
-    groups(): Promise<Iterator<DevialetGroup>> {
+    private async handleService(service: Service) {
+        if (service.port != 80) {
+            return;
+        }
+
+        // txt records aren't property parsed for reasons?
+        if (!devialetDevices.find(f => service.host.startsWith(f))) {
+            return;
+        }
+        try {
+            const deviceInfo = await this.deviceInfo(`${service.host}:80`);
+            this.registry.registerDevice({
+                id: deviceInfo.deviceId,
+                hostname: service.name,
+                address: service.host,
+                port: service.port,
+                information: deviceInfo
+            });
+        } catch (t) {
+            // how to handle this?
+            console.log(t);
+        }
+    }
+
+    groups(): Promise<DevialetGroup[]> {
         const run = async () => {
-            if (this.groupMap.size > 0) {
-                return this.groupMap.values();
+            if (!this.ready) {
+                throw Error("No Devialet Groups could be found on the given network");
             }
-            throw Error("no results");
+            return this.registry.groups();
         };
 
         return pRetry(run, {
             retries: 5,
-            minTimeout: 100,
-            maxTimeout: 1000 * 10
+            minTimeout: 500,
+            maxTimeout: 1000 * 30
         });
     }
 
-    watch(): Observable<DevialetGroup> {
-        return this.watcher.asObservable();
+    private async deviceInfo(ipAddress: string): Promise<DeviceInformation> {
+        const response = await axios.get<DeviceInformation>(`http://${ipAddress}${Queries.GENERAL_INFO}`);
+        return response.data;
     }
 }

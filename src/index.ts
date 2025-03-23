@@ -1,6 +1,9 @@
-import { createHttpDevialetClient } from "./api/client";
+import { Devialet } from "./api/client";
+import { DevialetmDNSResolver } from "./api/resolver";
 
-createHttpDevialetClient({mode: "mDNS"}).then(client => {
-    client.play();
+new DevialetmDNSResolver().groups().then(groups => {
+    const group = groups[0];
+    const client = new Devialet(group.leader);
+    client.pause().then(data => console.log(data));
 });
 

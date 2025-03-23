@@ -1,4 +1,19 @@
-export interface DeviceInformation {
+export type DevialetDevice = {
+    readonly id: string;
+    readonly hostname: string;
+    readonly address: string;
+    readonly port: number;
+    readonly information: ReadonlyDeviceInformation;
+}
+
+export type DevialetGroup = {
+    readonly leader: DevialetDevice;
+    readonly members: DevialetDevice[];
+}
+export type ReadonlyDeviceInformation = {
+    readonly [K in keyof DeviceInformation]: DeviceInformation[K];
+};
+export type DeviceInformation = {
     availableFeatures: string[];
     deviceId: string;
     deviceName: string;
