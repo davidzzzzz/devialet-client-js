@@ -1,4 +1,5 @@
-import { DevialetDevice, DevialetGroup } from "../models/device_information";
+import { DevialetDevice } from "../schemas/DevialetDevice";
+import { DevialetGroup } from "../schemas/DevialetGroup";
 
 export type DevialetDeviceFilter = (d: DevialetDevice) => boolean;
 

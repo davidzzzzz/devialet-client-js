@@ -1,9 +1,4 @@
-import { Devialet } from "./api/client";
-import { DevialetmDNSResolver } from "./api/resolver";
+import { DevialetDiscovery } from "./compat/async/DevialetDiscovery";
 
-new DevialetmDNSResolver().groups().then(groups => {
-    const group = groups[0];
-    const client = new Devialet(group.leader);
-    client.pause().then(data => console.log(data));
-});
-
+const discovery = new DevialetDiscovery();
+discovery.getDevices().then(d => console.log(d));

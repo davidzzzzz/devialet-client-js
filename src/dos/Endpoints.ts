@@ -1,4 +1,4 @@
-import { Source } from "../models/source";
+import { Source } from "../schemas/Source";
 
 const API_PREFIX = "/ipcontrol/v1";
 const DEVICES_PREFIX = `${API_PREFIX}/devices`;
@@ -31,5 +31,4 @@ export const Queries = {
     SOUND_MODE: `${SYSTEM_PREFIX}/settings/audio/soundMode`,
     SOURCES: `${GROUPS_PREFIX}/sources`,
     CURRENT_SOURCE: `${GROUPS_PREFIX}/sources/current`,
-    CURRENT_POSITION: `${GROUPS_PREFIX}/sources/current/playback/position`,
 };
