@@ -1,26 +1,22 @@
 import { Schema } from "effect";
-import { Source } from "./Source";
+import { SourceSchema } from "./Source";
 
-export const SourceTrackMetadata = Schema.Struct(
-    {
-        album: Schema.String,
-        artist: Schema.String,
-        coverArtDataPresent: Schema.Boolean,
-        duration: Schema.Number,
-        mediaType: Schema.String,
-        title: Schema.String,
-    }
-);
-
-export type SourceTrackMetadata = Schema.Schema.Type<typeof SourceTrackMetadata>;
-
-export const GroupState = Schema.Struct({
-    availableOperations: Schema.Array(Schema.Literal("play", "pause", "next", "previous","seek")),
-    metadata: Schema.optional(SourceTrackMetadata),
-        muteState: Schema.Literal("muted", "unmuted"),
+export class GroupStateSchema extends Schema.Class<GroupStateSchema>("devialet/groupState")({
+    availableOperations: Schema.Array(Schema.Literal('play', 'pause', 'previous', 'next')),
+    metadata: Schema.optional(Schema.Struct(
+        {
+            album: Schema.String,
+            artist: Schema.String,
+            coverArtDataPresent: Schema.Boolean,
+            duration: Schema.Number,
+            mediaType: Schema.String,
+            title: Schema.String,
+        }
+    )),
+    muteState: Schema.Literal("muted", "unmuted"),
     peerDeviceName: Schema.String,
-        playingState: Schema.Literal("playing", "pause"),
-    source: Source
-});
+    playingState: Schema.Literal("playing", "pause"),
+    source: SourceSchema
+}) {}
 
-export type GroupState = Schema.Schema.Type<typeof GroupState>;
+export type GroupState = typeof GroupStateSchema.Type;

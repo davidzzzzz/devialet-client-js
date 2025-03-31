@@ -1,14 +1,16 @@
-import { ConfigError, Effect } from "effect";
-import { DevialetDevice } from "../../schemas/DevialetDevice";
-import { createDosClient, DosClient } from "../../dos/DosClient";
-import { Source } from "../../schemas/Source";
-import { GroupState } from "../../schemas/GroupState";
+import { ConfigError, Effect, Option } from "effect";
+import { DosClient } from "../../dos/DosClient";
+import { DosDiscoveryService } from "../../dos/DosDiscoveryService";
+import { DeviceGroupSchema } from "../../schemas/DeviceGroup";
+import { DosDeviceSchema } from "../../schemas/DosDevice";
+import { GroupStateSchema } from "../../schemas/GroupState";
+import { SourceSchema } from "../../schemas/Source";
 
-export class DevialetDos {
+class DevialetDos {
     private clientAccess: Effect.Effect<DosClient, ConfigError.ConfigError, never>;
-    
-    constructor(leader: string | DevialetDevice) {
-        this.clientAccess = createDosClient(leader);
+
+    constructor(leader: string | DosDeviceSchema) {
+        this.clientAccess = DosClient.create(leader);
     }
 
     private async getClient(): Promise<DosClient> {
@@ -66,7 +68,7 @@ export class DevialetDos {
         return Effect.runPromise(client.commands.nightMode(nightMode));
     }
 
-    async setSource(source: Source): Promise<void> {
+    async setSource(source: SourceSchema): Promise<void> {
         const client = await this.getClient();
         return Effect.runPromise(client.commands.source(source));
     }
@@ -77,9 +79,9 @@ export class DevialetDos {
         return Effect.runPromise(client.queries.volume());
     }
 
-    async getSource(): Promise<Source> {
+    async getSources(): Promise<readonly SourceSchema[]> {
         const client = await this.getClient();
-        return Effect.runPromise(client.queries.source());
+        return Effect.runPromise(client.queries.sources());
     }
 
     async getNightMode(): Promise<boolean> {
@@ -87,8 +89,25 @@ export class DevialetDos {
         return Effect.runPromise(client.queries.nightMode());
     }
 
-    async getState(): Promise<GroupState> {
+    async getCurrentState(): Promise<GroupStateSchema | undefined> {
         const client = await this.getClient();
-        return Effect.runPromise(client.queries.state());
+        return Effect.runPromise(client.queries.state().pipe(Effect.map(
+            state => Option.isSome(state) ? state.value : undefined
+        )));
     }
 }
+
+class DevialetDiscovery {
+    private service: Effect.Effect<DosDiscoveryService, never, never>;
+    constructor() {
+        this.service = DosDiscoveryService.create();
+    }
+
+    getDevices(): Promise<DeviceGroupSchema[]> {
+        return Effect.runPromise(this.service.pipe(Effect.flatMap(s => s.groups())));
+    }
+}
+
+export const DevialetAsync = { 
+    DevialetDos, DevialetDiscovery 
+};

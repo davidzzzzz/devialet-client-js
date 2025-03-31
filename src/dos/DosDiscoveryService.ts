@@ -1,13 +1,14 @@
 import { Bonjour, Service } from 'bonjour-service'
 import debounce from 'debounce';
 import { DevialetDeviceRegistry } from './DeviceRegistry';
-import { Chunk, Effect, Stream, StreamEmit, Option, Sink } from 'effect';
-import { DevialetDeviceService } from './DevialetDeviceService';
-import { FetchHttpClient } from '@effect/platform';
+import { Chunk, Effect, Stream, StreamEmit, Option, Sink, Layer } from 'effect';
+import { DevialetDeviceService as DosDeviceService } from './DosDeviceService';
+import { DosApiError } from './DosApiError';
+import { DeviceGroup } from '../schemas/DeviceGroup';
 
 const devialetDevices: string[] = ['Phantom', 'Arch', 'Dialog'];
 
-export class DevialetDiscoveryService extends Effect.Service<DevialetDiscoveryService>()("devialet/discovery",
+export class DosDiscoveryService extends Effect.Service<DosDiscoveryService>()("devialet/discovery",
     {
         accessors: true,
         effect: Effect.gen(function*() {
@@ -26,7 +27,7 @@ export class DevialetDiscoveryService extends Effect.Service<DevialetDiscoverySe
                     browser.start();
                 }
             );
-            const deviceService = yield * DevialetDeviceService;
+            const deviceService = yield * DosDeviceService;
             const deviceStream = stream.pipe(
                 Stream.filter((s) => s.port == 80),
                 Stream.filter((s) => devialetDevices.findIndex((f) => s.host.startsWith(f)) != -1),
@@ -41,7 +42,7 @@ export class DevialetDiscoveryService extends Effect.Service<DevialetDiscoverySe
                     };
                 })),
             );
-            const groups = () => Effect.gen(function*() {
+            const groups = () : Effect.Effect<DeviceGroup[], DosApiError, never> => Effect.gen(function*() {
                 const devices = yield* Stream.run(deviceStream, Sink.collectAll());
                 devices.pipe(
                     Chunk.forEach((d) => registry.registerDevice(d))
@@ -53,20 +54,20 @@ export class DevialetDiscoveryService extends Effect.Service<DevialetDiscoverySe
             };
         }),
         dependencies: [
-            DevialetDeviceService.Default
+            DosDeviceService.Live
         ]
     }
-) { }
+) {
+    static Live = Layer.provide(DosDiscoveryService.Default, DosDeviceService.Live);
 
-export function createDiscoveryService(): Effect.Effect<DevialetDiscoveryService, never, never> {
-    return Effect.gen(function*() {
-        return yield* DevialetDiscoveryService;
-    }).pipe(
-        Effect.provide(DevialetDiscoveryService.Default),
-        Effect.provide(DevialetDeviceService.Default),
-        Effect.provide(FetchHttpClient.layer)
-    );
-} 
+    static create(): Effect.Effect<DosDiscoveryService, never, never> {
+        return Effect.gen(function* () {
+            return yield* DosDiscoveryService;
+        }).pipe(
+            Effect.provide(DosDiscoveryService.Live)
+        );
+ }
+}
 
 // export class foo {
 //     private bonjour: Bonjour;

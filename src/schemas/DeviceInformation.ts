@@ -1,14 +1,6 @@
 import { Schema } from "effect";
 
-export const Release = Schema.Struct(
-    {
-        buildType: Schema.String,
-        canonicalVersion: Schema.String,
-        version: Schema.String,
-    }
-);
-
-export const DevialetDeviceInformation = Schema.Struct({
+export class DeviceInformationSchema extends Schema.Class<DeviceInformationSchema>("devialet/device/information")({
     availableFeatures: Schema.Array(Schema.String),
     deviceId: Schema.String,
     deviceName: Schema.String,
@@ -20,12 +12,17 @@ export const DevialetDeviceInformation = Schema.Struct({
     model: Schema.String,
     modelFamily: Schema.String,
     powerRating: Schema.String,
-    release: Release,
+    release: Schema.Struct(
+        {
+            buildType: Schema.String,
+            canonicalVersion: Schema.String,
+            version: Schema.String,
+        }
+    ),
     role: Schema.String,
     serial: Schema.String,
     setupState: Schema.String,
     systemId: Schema.String,
-});
+}) {}
 
-export type DevialetDeviceInformation = Schema.Schema.Type<typeof DevialetDeviceInformation>;
-
+export type DeviceInformation = typeof DeviceInformationSchema.Type;

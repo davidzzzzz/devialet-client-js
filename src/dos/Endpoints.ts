@@ -1,8 +1,8 @@
-import { Source } from "../schemas/Source";
+import { SourceSchema } from "../schemas/Source";
 
 const API_PREFIX = "/ipcontrol/v1";
 const DEVICES_PREFIX = `${API_PREFIX}/devices`;
-const SYSTEM_PREFIX = `${API_PREFIX}/system/current`;
+const SYSTEM_PREFIX = `${API_PREFIX}/systems/current`;
 const GROUPS_PREFIX = `${API_PREFIX}/groups/current`;
 
 export const Mutations = {
@@ -19,7 +19,7 @@ export const Mutations = {
     PREVIOUS_TRACK: `${GROUPS_PREFIX}/sources/current/playback/previous`,
     NEXT_TRACK: `${GROUPS_PREFIX}/sources/current/playback/next`,
     UNMUTE: `${GROUPS_PREFIX}/sources/current/playback/unmute`,
-    SELECT_SOURCE: (source: Source) => `${GROUPS_PREFIX}/sources/${source.sourceId}/playback/play`,
+    SELECT_SOURCE: (source: SourceSchema) => `${GROUPS_PREFIX}/sources/${source.sourceId}/playback/play`,
 };
 export const Queries = {
     GENERAL_INFO: `${DEVICES_PREFIX}/current`,
