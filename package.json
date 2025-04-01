@@ -10,8 +10,8 @@
     "clean": "rm -rf dist"
   },
   "keywords": [],
-  "author": "David Zuckerman<dev@davidzuckerman.dev>",
-  "license": "ISC",
+  "author": "David Zuckerman<github@davidzuckerman.dev>",
+  "license": "MPL-2.0",
   "dependencies": {
     "@effect/platform": "^0.80.1",
     "bonjour-service": "^1.3.0",

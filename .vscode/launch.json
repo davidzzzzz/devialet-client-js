@@ -7,7 +7,7 @@
     "request": "launch",
 
     // Debug current file in VSCode
-    "program": "${workspaceFolder}/tests/main.test.ts",
+    "program": "${workspaceFolder}/examples/async.ts",
     /*
      * Path to tsx binary
      * Assuming locally installed

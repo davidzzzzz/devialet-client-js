@@ -2,7 +2,7 @@ import { Schema } from "effect";
 import { SourceSchema } from "./Source";
 
 export class GroupStateSchema extends Schema.Class<GroupStateSchema>("devialet/groupState")({
-    availableOperations: Schema.Array(Schema.Literal('play', 'pause', 'previous', 'next')),
+    availableOperations: Schema.Array(Schema.Literal('play', 'pause', 'previous', 'next', 'seek')),
     metadata: Schema.optional(Schema.Struct(
         {
             album: Schema.String,
@@ -15,7 +15,7 @@ export class GroupStateSchema extends Schema.Class<GroupStateSchema>("devialet/g
     )),
     muteState: Schema.Literal("muted", "unmuted"),
     peerDeviceName: Schema.String,
-    playingState: Schema.Literal("playing", "pause"),
+    playingState: Schema.Literal("playing", "paused"),
     source: SourceSchema
 }) {}
 
