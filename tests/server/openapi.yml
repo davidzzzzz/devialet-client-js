@@ -1,0 +1,236 @@
+openapi: 3.1.0
+info:
+  title: Devialet DOS API
+  description: OpenAPI specification for the Devialet DOS API client.
+  version: 1.0.0
+paths:
+  /ipcontrol/v1/groups/current/sources/current/playback/mute:
+    post:
+      summary: Mute the device
+      responses:
+        '200':
+          description: Successfully muted the device
+        '400':
+          description: Bad request
+        '500':
+          description: Server error
+
+  /ipcontrol/v1/groups/current/sources/current/playback/unmute:
+    post:
+      operationId: unmute
+      summary: Unmute the device
+      responses:
+        '200':
+          description: Successfully unmuted the device
+        '400':
+          description: Bad request
+        '500':
+          description: Server error
+
+  /ipcontrol/v1/groups/current/sources/current/playback/next:
+    post:
+      operationId: skip
+      summary: Skip to the next track
+      responses:
+        '200':
+          description: Successfully skipped to the next track
+        '400':
+          description: Bad request
+        '500':
+          description: Server error
+
+  /ipcontrol/v1/groups/current/sources/current/playback/previous:
+    post:
+      summary: Go to the previous track
+      operationId: previous
+      responses:
+        '200':
+          description: Successfully went to the previous track
+        '400':
+          description: Bad request
+        '500':
+          description: Server error
+
+  /ipcontrol/v1/groups/current/sources/current/playback/play:
+    post:
+      operationId: play
+      summary: Play the current track
+      responses:
+        '200':
+          description: Successfully started playback
+        '400':
+          description: Bad request
+        '500':
+          description: Server error
+
+  /ipcontrol/v1/groups/current/sources/current/playback/pause:
+    post:
+      operationId: pause
+      summary: Pause the current track
+      responses:
+        '200':
+          description: Successfully paused playback
+        '400':
+          description: Bad request
+        '500':
+          description: Server error
+
+  /ipcontrol/v1/systems/current/sources/current/soundControl/volume:
+    get:
+      operationId: getVolume
+      summary: Get the current volume
+      responses:
+        '200':
+          description: Successfully retrieved the current volume
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  volume:
+                    type: integer
+                    description: Current volume level
+                example:
+                  volume: 50
+        '500':
+          description: Server error
+    post:
+      summary: Set the volume
+      operationId: setVolume
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                volume:
+                  type: integer
+                  minimum: 0
+                  maximum: 100
+                  description: Volume level (0-100)
+              required:
+                - volume
+      responses:
+        '200':
+          description: Successfully set the volume
+        '400':
+          description: Bad request
+        '500':
+          description: Server error
+
+  /ipcontrol/v1/systems/current/settings/audio/nightMode:
+    get:
+      operationId: getNightMode
+      summary: Get the current night mode state
+      responses:
+        '200':
+          description: Successfully retrieved the night mode state
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  nightMode:
+                    type: string
+                    enum: [on, off]
+                    description: Current night mode state
+                example:
+                  nightMode: on
+        '500':
+          description: Server error
+
+    post:
+      summary: Set night mode
+      operationId: setNightMode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nightMode:
+                  type: string
+                  enum: [on, off]
+                  description: Night mode state
+              required:
+                - nightMode
+      responses:
+        '200':
+          description: Successfully set night mode
+        '400':
+          description: Bad request
+        '500':
+          description: Server error
+
+  /ipcontrol/v1/groups/current/sources:
+    get:
+      summary: Get available sources
+      operationId: getSources
+      responses:
+        '200':
+          description: Successfully retrieved sources
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sources:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Source'
+                example:
+                  sources:
+                    - deviceId: "device1"
+                      type: "airplay2"
+                      sourceId: "source1"
+                    - deviceId: "device2"
+                      type: "airplay2"
+                      sourceId: "source2"
+        '500':
+          description: Server error
+
+  /ipcontrol/v1/groups/current/sources/current:
+    get:
+      summary: Get the current group state
+      operationId: getCurrentSource     
+      responses:
+        '200':
+          description: Successfully retrieved the group state
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/GroupState'
+                  - $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server error
+
+components:
+  schemas:
+    Source:
+      type: object
+      properties:
+        deviceId:
+          type: string
+        sourceId:
+          type: string
+        type:
+          type: string
+          enum: [airplay2, bluetooth] # limited set
+    GroupState:
+      type: object
+      properties:
+        groupId:
+          type: string
+          description: ID of the group
+        state:
+          type: string
+          description: Current state of the group
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
