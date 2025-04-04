@@ -21,10 +21,6 @@ yarn add devialet-client-js
 ```
 
 
-## API Documentation (coming soon)
-
-For detailed API documentation, please refer to the [API Docs](./docs/API.md).
-
 <!-- ## Contributing
 
 Contributions are welcome! Please follow these steps:
