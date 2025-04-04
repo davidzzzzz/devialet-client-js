@@ -142,7 +142,7 @@ class DevialetDos {
 
     /**
      * Gets the current source of the device.
-     * @returns {Promise<Source>} - A promise that resolves to the current source.
+     * @returns {Promise<Source[]>} - A promise that resolves to the current sources.
      * @throws {ConfigError.ConfigError} - If the command fails.
      */
     async getSources(): Promise<readonly Source[]> {
