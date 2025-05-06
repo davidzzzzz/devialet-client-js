@@ -5,6 +5,8 @@ import { DeviceGroup } from "../../schemas/DeviceGroup";
 import { DosDevice } from "../../schemas/DosDevice";
 import { GroupState } from "../../schemas/GroupState";
 import { Source } from "../../schemas/Source";
+import { DosDeviceService } from "../../dos/DosDeviceService";
+import { DeviceInformation } from "../../schemas/DeviceInformation";
 
 
 class DevialetDos {
@@ -109,6 +111,16 @@ class DevialetDos {
     }
 
     /**
+     * Sets the mute state of the device.
+     * @param {boolean} mute - The mute state to set (true for mute, false for unmute).
+     * @returns {Promise<void>} - A promise that resolves when the command is executed.
+     */
+    async setMute(mute: boolean): Promise<void> {
+        const client = await this.getClient();
+        return Effect.runPromise(mute ? client.commands.mute() : client.commands.unmute());
+    }
+
+    /**
      * Sets the night mode of the device.
      * @param {"on" | "off"} nightMode - The night mode setting ("on" or "off").
      * @returns {Promise<void>} - A promise that resolves when the command is executed.
@@ -192,6 +204,17 @@ class DevialetDiscovery {
     }
 }
 
+class DevialetDevices {
+    private service: Effect.Effect<DosDeviceService, never, never>;
+    constructor() {
+        this.service = DosDeviceService.create();
+    }
+
+    getInformation(idAddress: string): Promise<DeviceInformation> {
+        return Effect.runPromise(this.service.pipe(Effect.flatMap(s => s.queryDevice(idAddress))));
+    }
+}
+
 export const DevialetAsync = { 
-    DevialetDos, DevialetDiscovery 
+    DevialetDos, DevialetDiscovery, DevialetDevices
 };

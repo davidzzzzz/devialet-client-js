@@ -3,6 +3,7 @@ export { DosClient } from "./dos/DosClient";
 export { DosDiscoveryService } from "./dos/DosDiscoveryService";
 export { DosDevice } from "./schemas/DosDevice";
 export { Source } from "./schemas/Source";
+export { SourceTypes } from "./schemas/SourceTypes";
 export { GroupState } from "./schemas/GroupState";
 export { DeviceGroup } from "./schemas/DeviceGroup";
 export { DevialetAsync } from "./compat/async/DevialetAsync";

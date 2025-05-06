@@ -2,7 +2,7 @@ import { Bonjour, Service } from 'bonjour-service'
 import debounce from 'debounce';
 import { DevialetDeviceRegistry } from './DeviceRegistry';
 import { Chunk, Effect, Stream, StreamEmit, Option, Sink, Layer } from 'effect';
-import { DevialetDeviceService as DosDeviceService } from './DosDeviceService';
+import { DosDeviceService as DosDeviceService } from './DosDeviceService';
 import { DosApiError } from './DosApiError';
 import { DeviceGroup } from '../schemas/DeviceGroup';
 

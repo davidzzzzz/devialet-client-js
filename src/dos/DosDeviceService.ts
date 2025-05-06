@@ -10,14 +10,14 @@ import { DosApiError } from "./DosApiError";
  * 
  * @example
  * // Query a device at a specific IP address
- * const program = DevialetDeviceService.queryDevice("http://192.168.1.10").pipe(
+ * const program = DosDeviceService.queryDevice("http://192.168.1.10").pipe(
  *   Effect.map(deviceInfo => console.log(deviceInfo))
  * );
  * 
  * // Run the program with the Live layer
- * Effect.runPromise(Effect.provideLayer(program, DevialetDeviceService.Live));
+ * Effect.runPromise(Effect.provideLayer(program, DosDeviceService.Live));
  */
-export class DevialetDeviceService extends Effect.Service<DevialetDeviceService>()(
+export class DosDeviceService extends Effect.Service<DosDeviceService>()(
     'devialet/devices', {
     accessors: true,
     effect: Effect.gen(function* () {
@@ -48,5 +48,13 @@ export class DevialetDeviceService extends Effect.Service<DevialetDeviceService>
     ]
 }
 ) { 
-    static Live = Layer.provide(DevialetDeviceService.Default, FetchHttpClient.layer);
+    static Live = Layer.provide(DosDeviceService.Default, FetchHttpClient.layer);
+
+    static create(): Effect.Effect<DosDeviceService, never, never> {
+        return Effect.gen(function* () {
+            return yield* DosDeviceService;
+        }).pipe(
+            Effect.provide(DosDeviceService.Live)
+        );
+}
 }
