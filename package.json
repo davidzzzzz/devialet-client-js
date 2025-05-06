@@ -1,6 +1,6 @@
 {
   "name": "devialet-dos-client-js",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "A Devialet Client for Node.js",
   "main": "dist/index.js",
   "scripts": {
@@ -10,8 +10,8 @@
     "clean": "rm -rf dist",
     "test": "jest --detectOpenHandles --runInBand --forceExit"
   },
-  "keywords": [],
-  "author": "David Zuckerman<github@davidzuckerman.dev>",
+  "keywords": ["Devialet", "Phantom Speaker"],
+  "author": "David Zuckerman<builtby@davidzuckerman.dev>",
   "license": "MIT",
   "dependencies": {
     "@effect/platform": "^0.80.1",

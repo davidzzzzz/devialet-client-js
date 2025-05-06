@@ -8,8 +8,109 @@ import { Source } from "../../schemas/Source";
 import { DosDeviceService } from "../../dos/DosDeviceService";
 import { DeviceInformation } from "../../schemas/DeviceInformation";
 
+export interface DosClientAsync {
+    /**
+     * Mutes the device.
+     * @returns {Promise<void>} - A promise that resolves when the command is executed.
+     * @throws {DosApiError}
+     */
+    mute(): Promise<void>;
+    /**
+     * Unmutes the device.
+     * @returns {Promise<void>} - A promise that resolves when the command is executed.
+     * @throws {DosApiError}
+     */
+    unmute(): Promise<void>;
+    /**
+     * Skips to the next track in the playlist.
+     * @returns {Promise<void>} - A promise that resolves when the command is executed.
+     * @throws {DosApiError}
+     */
+    next(): Promise<void>;
+    /**
+     * Skips to the previous track in the playlist.
+     * @returns {Promise<void>} - A promise that resolves when the command is executed.
+     * @throws {DosApiError}
+     */
+    previous(): Promise<void>;
+    /**
+     * Plays the current track.
+     * @returns {Promise<void>} - A promise that resolves when the command is executed.
+     * @throws {DosApiError}
+     */
+    play(): Promise<void>;
+    /**
+     * Pauses the current track.
+     * @returns {Promise<void>} - A promise that resolves when the command is executed.
+     * @throws {DosApiError}
+     */
+    pause(): Promise<void>;
+    /**
+     * Increases the volume of the device.
+     * @returns {Promise<void>} - A promise that resolves when the command is executed.
+     * @throws {DosApiError}
+     */
+    volumeUp(): Promise<void>;
+    /**
+     *  Decreases the volume of the device.
+     * @returns {Promise<void>} - A promise that resolves when the command is executed.
+     * @throws {DosApiError}
+     */
+    volumeDown(): Promise<void>;
+    /**
+     * Sets the volume of the device.
+     * @param {number} volume - The volume level to set (0-100).
+     * @returns {Promise<void>} - A promise that resolves when the command is executed.
+     */
+    setVolume(volume: number): Promise<void>;
+    /**
+     * Sets the mute state of the device.
+     * @param {boolean} mute - The mute state to set (true for mute, false for unmute).
+     * @returns {Promise<void>} - A promise that resolves when the command is executed.
+     */
+    setMute(mute: boolean): Promise<void>;
+    /**
+     * Sets the night mode of the device.
+     * @param {"on" | "off"} nightMode - The night mode setting ("on" or "off").
+     * @returns {Promise<void>} - A promise that resolves when the command is executed.
+     * @throws {DosApiError}
+     */
+    setNightMode(nightMode: "on" | "off"): Promise<void>;
+    /**
+     *  Sets the source of the device.
+     * @param {Source} source - The source to set.
+     * @returns {Promise<void>} - A promise that resolves when the command is executed.
+     * @throws {DosApiError}
+     */
+    setSource(source: Source): Promise<void>;
+    /**
+     * Gets the current volume of the device.
+     * @throws {DosApiError}
+     * @throws {ConfigError.ConfigError} - If the command fails.
+     */
+    getVolume(): Promise<number>;
+    /**
+     * Gets the current source of the device.
+     * @returns {Promise<Source[]>} - A promise that resolves to the current sources.
+     * @throws {DosApiError}
+     */
+    getSources(): Promise<readonly Source[]>;
+    /**
+     *  Gets the current night mode of the device.
+     * @returns {Promise<boolean>} - A promise that resolves to true if night mode is enabled, false otherwise.
+     * @throws {DosApiError}
+     */
+    getNightMode(): Promise<boolean>;
+    /**
+     * Gets the current state of the device.
+     * @returns {Promise<GroupState | undefined>} - A promise that resolves to the current state of the device.
+     * @throws {DosApiError}
+     */
+    getCurrentState(): Promise<GroupState | undefined>;
+}
 
-class DevialetDos {
+
+class DosClientAsyncImpl implements DosClientAsync {
     private clientAccess: Effect.Effect<DosClient, ConfigError.ConfigError, never>;
 
     constructor(leader: string | DosDevice) {
@@ -20,163 +121,81 @@ class DevialetDos {
         return Effect.runPromise(this.clientAccess);
     }
 
-    /**
-     * Mutes the device.
-     * @returns {Promise<void>} - A promise that resolves when the command is executed.
-     * @throws {ConfigError.ConfigError} - If the command fails.
-     */
     async mute(): Promise<void> {
         const client = await this.getClient();
         return Effect.runPromise(client.commands.mute());
     }
 
-    /**
-     * Unmutes the device.
-     * @returns {Promise<void>} - A promise that resolves when the command is executed.
-     * @throws {ConfigError.ConfigError} - If the command fails.
-     */
     async unmute(): Promise<void> {
         const client = await this.getClient();
         return Effect.runPromise(client.commands.unmute());
     }
 
-    /**
-     * Skips to the next track in the playlist.
-     * @returns {Promise<void>} - A promise that resolves when the command is executed.
-     * @throws {ConfigError.ConfigError} - If the command fails.
-     */
     async next(): Promise<void> {
         const client = await this.getClient();
         return Effect.runPromise(client.commands.next());
     }
 
-    /**
-     * Skips to the previous track in the playlist.
-     * @returns {Promise<void>} - A promise that resolves when the command is executed.
-     * @throws {ConfigError.ConfigError} - If the command fails.
-     */
     async previous(): Promise<void> {
         const client = await this.getClient();
         return Effect.runPromise(client.commands.previous());
     }
 
-    /**
-     * Plays the current track.
-     * @returns {Promise<void>} - A promise that resolves when the command is executed.
-     * @throws {ConfigError.ConfigError} - If the command fails.
-     */
     async play(): Promise<void> {
         const client = await this.getClient();
         return Effect.runPromise(client.commands.play());
     }
 
-    /**
-     * Pauses the current track.
-     * @returns {Promise<void>} - A promise that resolves when the command is executed.
-     * @throws {ConfigError.ConfigError} - If the command fails.
-     */
     async pause(): Promise<void> {
         const client = await this.getClient();
         return Effect.runPromise(client.commands.pause());
     }
 
-    /**
-     * Increases the volume of the device.
-     * @returns {Promise<void>} - A promise that resolves when the command is executed.
-     * @throws {ConfigError.ConfigError} - If the command fails.
-     */
     async volumeUp(): Promise<void> {
         const client = await this.getClient();
         return Effect.runPromise(client.commands.volumeUp());
     }
 
-    /**
-     *  Decreases the volume of the device.
-     * @returns {Promise<void>} - A promise that resolves when the command is executed.
-     * @throws {ConfigError.ConfigError} - If the command fails.
-     */
     async volumeDown(): Promise<void> {
         const client = await this.getClient();
         return Effect.runPromise(client.commands.volumeDown());
     }
 
-    /**
-     * Sets the volume of the device.
-     * @param {number} volume - The volume level to set (0-100).
-     * @returns {Promise<void>} - A promise that resolves when the command is executed.
-     */
     async setVolume(volume: number): Promise<void> {
         const client = await this.getClient();
         return Effect.runPromise(client.commands.volume(volume));
     }
 
-    /**
-     * Sets the mute state of the device.
-     * @param {boolean} mute - The mute state to set (true for mute, false for unmute).
-     * @returns {Promise<void>} - A promise that resolves when the command is executed.
-     */
     async setMute(mute: boolean): Promise<void> {
         const client = await this.getClient();
         return Effect.runPromise(mute ? client.commands.mute() : client.commands.unmute());
     }
 
-    /**
-     * Sets the night mode of the device.
-     * @param {"on" | "off"} nightMode - The night mode setting ("on" or "off").
-     * @returns {Promise<void>} - A promise that resolves when the command is executed.
-     * @throws {ConfigError.ConfigError} - If the command fails.
-     */
     async setNightMode(nightMode: "on" | "off"): Promise<void> {
         const client = await this.getClient();
         return Effect.runPromise(client.commands.nightMode(nightMode));
     }
 
-    /**
-     *  Sets the source of the device.
-     * @param {Source} source - The source to set.
-     * @returns {Promise<void>} - A promise that resolves when the command is executed.
-     * @throws {ConfigError.ConfigError} - If the command fails.
-     */
     async setSource(source: Source): Promise<void> {
         const client = await this.getClient();
         return Effect.runPromise(client.commands.source(source));
     }
 
-    /**
-     * Gets the current volume of the device.
-     * @returns {Promise<number>} - A promise that resolves to the current volume level (0-100).
-     * @throws {ConfigError.ConfigError} - If the command fails.
-     */
     async getVolume(): Promise<number> {
         const client = await this.getClient();
         return Effect.runPromise(client.queries.volume());
     }
 
-    /**
-     * Gets the current source of the device.
-     * @returns {Promise<Source[]>} - A promise that resolves to the current sources.
-     * @throws {ConfigError.ConfigError} - If the command fails.
-     */
     async getSources(): Promise<readonly Source[]> {
         const client = await this.getClient();
         return Effect.runPromise(client.queries.sources());
     }
 
-    /**
-     *  Gets the current night mode of the device.
-     * @returns {Promise<boolean>} - A promise that resolves to true if night mode is enabled, false otherwise.
-     * @throws {ConfigError.ConfigError} - If the command fails.
-     */
     async getNightMode(): Promise<boolean> {
         const client = await this.getClient();
         return Effect.runPromise(client.queries.nightMode());
     }
 
-    /**
-     * Gets the current state of the device.
-     * @returns {Promise<GroupState | undefined>} - A promise that resolves to the current state of the device.
-     * @throws {ConfigError.ConfigError} - If the command fails.
-     */
     async getCurrentState(): Promise<GroupState | undefined> {
         const client = await this.getClient();
         return Effect.runPromise(client.queries.state().pipe(Effect.map(
@@ -185,26 +204,35 @@ class DevialetDos {
     }
 }
 
+
 /**
- * DevialetDiscovery class for discovering Devialet devices on the network.
+ * DosDiscoveryServiceAsync class for discovering Devialet devices on the network.
  */
-class DevialetDiscovery {
+export interface DosDiscoveryServiceAsync {
+    /**
+     * Gets the list of discovered devices.
+     * @returns {Promise<DeviceGroup[]>} - A promise that resolves to an array of discovered devices.
+     * @throws {DosApiError}
+     */
+    getDevices(): Promise<DeviceGroup[]>
+}
+
+class DosDiscoveryServiceAsyncImpl implements DosDiscoveryServiceAsync {
     private service: Effect.Effect<DosDiscoveryService, never, never>;
     constructor() {
         this.service = DosDiscoveryService.create();
     }
 
-    /**
-     * Gets the list of discovered devices.
-     * @returns {Promise<DeviceGroup[]>} - A promise that resolves to an array of discovered devices.
-     * @throws {ConfigError.ConfigError} - If the command fails.
-     */
     getDevices(): Promise<DeviceGroup[]> {
         return Effect.runPromise(this.service.pipe(Effect.flatMap(s => s.groups())));
     }
 }
 
-class DevialetDevices {
+export interface DosDeviceServiceAsync {
+    getInformation(idAddress: string): Promise<DeviceInformation>;
+}
+
+class DosDeviceServiceAsyncImpl implements DosDeviceServiceAsync {
     private service: Effect.Effect<DosDeviceService, never, never>;
     constructor() {
         this.service = DosDeviceService.create();
@@ -215,6 +243,8 @@ class DevialetDevices {
     }
 }
 
-export const DevialetAsync = { 
-    DevialetDos, DevialetDiscovery, DevialetDevices
+export const DevialetAsync = {
+    createDosClient: (leader: string | DosDevice): DosClientAsync => new DosClientAsyncImpl(leader),
+    createDiscoveryClient: (): DosDiscoveryServiceAsync => new DosDiscoveryServiceAsyncImpl(),
+    createDeviceService: (): DosDeviceServiceAsync => new DosDeviceServiceAsyncImpl()
 };
