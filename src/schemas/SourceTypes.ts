@@ -9,5 +9,11 @@ export enum SourceTypes {
     Bluetooth = "bluetooth",
     UPnP = "upnp",
     Raat = "raat",
-    SpotifyConnect = "spotifyconnect",
+    SpotifyConnect = "spotifyconnect"
 }
+
+export const isAutoDetectedSource = (source: SourceTypes): boolean => source !== SourceTypes.Phono && source !== SourceTypes.Line
+
+export const isPhysicalSource = (source: SourceTypes): boolean => source === SourceTypes.Phono || source === SourceTypes.Line || source === SourceTypes.DigitalLeft || source === SourceTypes.DigitalRight || source === SourceTypes.Optical || source === SourceTypes.OpticalJack
+
+export const isNonPhysicalSource = (source: SourceTypes): boolean => !isPhysicalSource(source)
