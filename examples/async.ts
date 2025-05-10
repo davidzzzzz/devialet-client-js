@@ -1,8 +1,8 @@
 import { DevialetAsync } from '../src/compat/async/DevialetAsync';
 
-const discovery = new DevialetAsync.DevialetDiscovery();
+const discovery = DevialetAsync.createDiscoveryClient();
 discovery.getDevices().then(d => {
     console.log(d);
-    const dos = new DevialetAsync.DevialetDos(d[0].leader);
+    const dos = DevialetAsync.createDosClient(d[0].leader);
     dos.getCurrentState().then(n => console.log(n));
 });

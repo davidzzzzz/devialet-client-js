@@ -1,17 +1,19 @@
 export enum SourceTypes {
-    Airplay = "airplay2",
-    Bluetooth = "bluetooth",
+    Phono = "phono",
+    Line = "line",
     DigitalLeft = "digital_left",
     DigitalRight = "digital_right",
-    Line = "line",
-    UPnP = "upnp",
     Optical = "optical",
-    OpticalLeft = "optical_left",
-    OpticalRight = "optical_right",
     OpticalJack = "opticaljack",
-    OpticalJackLeft = "opticaljack_left",
-    OpticalJackRight = "opticaljack_right",
-    Phono = "phono",
+    Airplay = "airplay2",
+    Bluetooth = "bluetooth",
+    UPnP = "upnp",
     Raat = "raat",
-    SpotifyConnect = "spotifyconnect",
+    SpotifyConnect = "spotifyconnect"
 }
+
+export const isAutoDetectedSource = (source: SourceTypes): boolean => source !== SourceTypes.Phono && source !== SourceTypes.Line
+
+export const isPhysicalSource = (source: SourceTypes): boolean => source === SourceTypes.Phono || source === SourceTypes.Line || source === SourceTypes.DigitalLeft || source === SourceTypes.DigitalRight || source === SourceTypes.Optical || source === SourceTypes.OpticalJack
+
+export const isNonPhysicalSource = (source: SourceTypes): boolean => !isPhysicalSource(source)

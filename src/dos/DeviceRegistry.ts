@@ -1,12 +1,12 @@
-import { DosDeviceSchema } from "../schemas/DosDevice";
-import { DeviceGroupSchema } from "../schemas/DeviceGroup";
+import { DeviceGroup } from "../schemas/DeviceGroup";
+import { DosDevice } from "../schemas/DosDevice";
 
-export type DevialetDeviceFilter = (d: DosDeviceSchema) => boolean;
+export type DevialetDeviceFilter = (d: DosDevice) => boolean;
 
 export class DevialetDeviceRegistry {
-    private registry: Map<string, DosDeviceSchema> = new Map();
+    private registry: Map<string, DosDevice> = new Map();
 
-    public registerDevice(device: DosDeviceSchema): void {
+    public registerDevice(device: DosDevice): void {
         this.registry.set(device.id, device);
     }
 
@@ -14,7 +14,7 @@ export class DevialetDeviceRegistry {
         return this.registry.has(id);
     }
 
-    public getDevice(id: string): DosDeviceSchema | undefined {
+    public getDevice(id: string): DosDevice | undefined {
         return this.registry.get(id);
     }
 
@@ -29,11 +29,11 @@ export class DevialetDeviceRegistry {
         }
     }
 
-    public devices(): DosDeviceSchema[] {
+    public devices(): DosDevice[] {
         return Array.from(this.registry.values());
     }
 
-    public groups() : DeviceGroupSchema[] {
+    public groups(): DeviceGroup[] {
         return [...Map.groupBy(this.registry, (v) => v[1].information.groupId).values()].map(group => {
             const leader = group.find(l => l[1].information.isSystemLeader)?.[1];
             if (leader === undefined) {

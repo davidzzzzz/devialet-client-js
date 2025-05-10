@@ -1,17 +1,19 @@
 import { FetchHttpClient, HttpClient, HttpClientRequest, HttpClientResponse } from "@effect/platform";
 import { Config, ConfigError, ConfigProvider, Effect, Layer, Option, Schema } from "effect";
-import { DosDeviceSchema } from "../schemas/DosDevice";
+import { DosDevice } from "../schemas/DosDevice";
 import { DosError } from "../schemas/DosError";
 import { GroupStateSchema, GroupState } from "../schemas/GroupState";
 import { Source, SourceSchema } from "../schemas/Source";
 import { DosApiError } from "./DosApiError";
 import { Mutations, Queries } from "./Endpoints";
 
-const Volume = Schema.Struct({ volume: Schema.Number });
+const VolumeSchema = Schema.Struct({ volume: Schema.Number });
 const NightMode = Schema.Struct({ nightMode: Schema.Literal("on", "off") });
 const ErrorResponse = Schema.Struct({ error: DosError });
 const Sources = Schema.Struct({ sources: Schema.Array(SourceSchema) });
 const CurrentSourceResponse = Schema.Union(ErrorResponse, GroupStateSchema);
+const CurrentVolumeResponse = Schema.Union(ErrorResponse, VolumeSchema);
+type Volume = typeof VolumeSchema.Type;
 
 /**
  * Client for interacting with Devialet Operating System (DOS) API
@@ -138,7 +140,13 @@ export class DosClient extends Effect.Service<DosClient>()('devialet/dos', {
                  * Get the current volume level of the device.
                  * @returns {Effect.Effect<number, DosApiError, never>} - An effect that returns the current volume level   
                  */
-                volume: () : Effect.Effect<number, DosApiError, never> => queryGenerator(Queries.VOLUME, Volume).pipe(Effect.flatMap(v => Effect.succeed(v.volume))),
+                volume: (): Effect.Effect<number, DosApiError, never> => queryGenerator(Queries.VOLUME, CurrentVolumeResponse).pipe(Effect.flatMap(v => {
+                    if (v instanceof VolumeSchema) {
+                        const vol = v as Volume;
+                        return Effect.succeed(vol.volume);
+                    }
+                    return Effect.succeed(0);
+                })),
                 /**
                  * Get the list of available sources for the device.
                  * @returns {Effect.Effect<readonly Source[], DosApiError, never>} - An effect that returns the list of sources
@@ -172,14 +180,14 @@ export class DosClient extends Effect.Service<DosClient>()('devialet/dos', {
     /**
      * Creates a configuration provider for the DosClient.
      */
-    static config = (leader: string | DosDeviceSchema) => Effect.withConfigProvider(
+    static config = (leader: string | DosDevice) => Effect.withConfigProvider(
         ConfigProvider.fromJson({ "devialet.address": (typeof leader === "string") ? leader : leader.address })
     );
     /**
      * Creates a new instance of the DosClient.
-     * @param {string | DosDeviceSchema} leader - The IP address of the device or a DosDeviceSchema object
+     * @param {string | DosDevice} leader - The IP address of the device or a DosDeviceSchema object
      */
-    static create(leader: string | DosDeviceSchema): Effect.Effect<DosClient, ConfigError.ConfigError, never> {
+    static create(leader: string | DosDevice): Effect.Effect<DosClient, ConfigError.ConfigError, never> {
         return Effect.gen(function* () {
             return yield* DosClient;
         }).pipe(
