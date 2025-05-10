@@ -4,8 +4,8 @@
   "description": "A Devialet Client for Node.js",
   "main": "dist/index.js",
   "scripts": {
-    "lint": "eslint 'src/**/*.{ts,tsx}'",
-    "lint:fix": "eslint 'src/**/*.{ts,tsx}' --fix",
+    "check": "eslint 'src/**/*.{ts,tsx}'",
+    "check:fix": "eslint 'src/**/*.{ts,tsx}' --fix",
     "build": "tsup src/index.ts --format cjs,esm --dts --sourcemap --out-dir dist",
     "clean": "rm -rf dist",
     "test": "jest --detectOpenHandles --runInBand --forceExit"
