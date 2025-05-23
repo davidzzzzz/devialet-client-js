@@ -7,6 +7,10 @@
   "files": [
     "./dist"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/davidzzzzz/devialet-client-js.git"
+  },
   "scripts": {
     "check": "eslint 'src/**/*.{ts,tsx}'",
     "check:fix": "eslint 'src/**/*.{ts,tsx}' --fix",
