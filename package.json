@@ -1,8 +1,12 @@
 {
   "name": "devialet-dos-client-js",
   "version": "0.0.1",
-  "description": "A Devialet Client for Node.js",
-  "main": "dist/index.js",
+  "description": "A Devialet Client to interact with the Devialet Phantom I/II Speakers.",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "./dist"
+  ],
   "scripts": {
     "check": "eslint 'src/**/*.{ts,tsx}'",
     "check:fix": "eslint 'src/**/*.{ts,tsx}' --fix",
@@ -10,7 +14,7 @@
     "clean": "rm -rf dist",
     "test": "jest --detectOpenHandles --runInBand --forceExit"
   },
-  "keywords": ["Devialet", "Phantom Speaker"],
+  "keywords": ["Devialet", "Phantom Speaker", "home automation", "home assistant", "devialet client"],
   "author": "David Zuckerman<builtby@davidzuckerman.dev>",
   "license": "MIT",
   "dependencies": {
